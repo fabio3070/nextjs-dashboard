@@ -5,8 +5,23 @@ import { CreateInvoice } from '@/app/ui/invoices/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
+import { fetchInvoicesPages } from '@/app/lib/data';
+
+export interface SearchParams {
+  query?: string;
+  page?: string;
+}
+
+export interface PageProps {
+  searchParams?: Promise<SearchParams>;
+}
  
-export default async function Page() {
+export default async function Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const query =  resolvedSearchParams?.query || '';
+  const currentPage = Number(resolvedSearchParams?.page) || 1;
+  const totalPages = await fetchInvoicesPages(query);
+  
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -16,11 +31,11 @@ export default async function Page() {
         <Search placeholder="Search invoices..." />
         <CreateInvoice />
       </div>
-      {/*  <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
-      </Suspense> */}
+      </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );
